@@ -1,0 +1,57 @@
+---
+# Configurar idioma español
+- name: Configurar español como idioma por defecto
+  lineinfile: dest=/etc/default/locale
+    regexp='^LANG='
+    line='LANG="es_ES.UTF-8"'
+  tags:
+    - locales
+
+- name: Configurar variable de entorno para idioma español
+  lineinfile: dest=/etc/environment
+    line='LANG="es_ES.UTF-8"'
+  tags:
+    - locales
+
+# Instalar y configurar teclado en español
+- name: Configurar teclado en español
+  lineinfile: dest=/etc/default/keyboard
+    regexp='^XKBLAYOUT='
+    line='XKBLAYOUT=es'
+  register: keyboard
+  tags:
+    - keyboard
+
+- name: Configurar teclado 105 teclas
+  lineinfile: dest=/etc/default/keyboard
+    regexp='^XKBMODEL='
+    line='XKBMODEL=105'
+  tags:
+    - keyboard
+
+- name: Reconfigurar consola con los nuevos ajustes de teclado
+  command: dpkg-reconfigure --default-priority console-setup
+  when: keyboard|changed
+  tags:
+    - keyboard
+
+# Configurar entorno BASH
+- name: Reconfigurar BASH para root
+  copy: src=bashrc
+    dest=/root/.bashrc
+    owner=root group=root mode=0644
+  tags:
+    - bash
+
+- name: Comprobar si existe /home/vagrant
+  stat: path=/home/vagrant
+  register: vagrant_home
+
+- name: Reconfigurar BASH para usuario vagrant
+  copy: src=bashrc
+    dest=/home/vagrant/.bashrc
+    owner=vagrant group=vagrant mode=0644
+  when: vagrant_home.stat.exists
+  tags:
+    - bash
+

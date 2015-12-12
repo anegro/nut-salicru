@@ -1,0 +1,16 @@
+---
+# TAGS: locales, keyboard, bash, utilities, repositories
+
+# Realizar operaciones comunes para todas las distribuciones
+- name: Personalizaciones comunes
+  include: common.yml
+
+# Realizar operaciones específicas para cada distribución
+- name: Personalizar Debian
+  include: debian.yml
+  when: ansible_distribution == "Debian" #and ansible_distribution_release == "wheezy"
+
+- name: Personalizar Ubuntu
+  include: ubuntu.yml
+  when: ansible_distribution == "Ubuntu" #and ansible_distribution_release == "trusty"
+

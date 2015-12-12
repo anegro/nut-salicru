@@ -1,0 +1,156 @@
+---
+# Instalar NUT y configurar como maestro en red
+- name: Instalar NUT
+  apt: pkg={{ item }} state=installed
+  with_items:
+    - nut
+    - nut-cgi
+    - apache2
+  notify:
+    - start nut-server
+    - start nut-client
+
+- name: Activar modo servidor de red
+  lineinfile: dest=/etc/nut/nut.conf
+    regexp='^MODE='
+    line='MODE=netserver'
+    owner=root group=nut mode=0640
+  notify: restart nut-server
+
+
+### Configuración del driver del SAI
+- name: Configurar driver para SAI Salicru SPS SOHO+
+  template: src=ups.conf.j2
+    dest=/etc/nut/ups.conf
+    owner=root group=nut mode=0640
+  when: production
+
+- name: Configurar DUMMY driver para SAI Salicru SPS SOHO+
+  template: src=ups-dummy.conf.j2
+    dest=/etc/nut/ups.conf
+    owner=root group=nut mode=0640
+  notify: restart nut-server
+  when: development
+
+- name: Copiar archivo dummy.dev
+  copy: src=dummy.dev
+    dest=/etc/nut/dummy.dev
+    owner=root group=nut mode=0640
+  notify: restart nut-server
+  when: development
+#####
+
+
+# Configurar el servicio UPSd
+- name: Configurar servicio upsd
+  template: src=upsd.conf.j2
+    dest=/etc/nut/upsd.conf
+    owner=root group=nut mode=0640
+  notify: restart nut-server
+
+- name: Configurar usuarios para el servicio upsd
+  template: src=upsd.users.j2
+    dest=/etc/nut/upsd.users
+    owner=root group=nut mode=0640
+  notify: restart nut-server
+
+- name: Clave utilizada para todos los usuarios de UPSd
+  debug: msg="{{ upsd_password }}"
+
+#- name: Parchear script /etc/init.d/nut-client
+- copy: src=nut-client
+    dest=/etc/init.d/nut-client
+    owner=root group=root mode=0755
+
+- name: Parchear script /etc/init.d/nut-server
+  copy: src=nut-server
+    dest=/etc/init.d/nut-server
+    owner=root group=root mode=0755
+
+### Configuración de TCP wrappers (en caso de ser necesario, revisar plantillas)
+#- name: Configurar TCP Wrappers Allow
+#  template: src=hosts.allow.j2
+#    dest=/etc/hosts.allow
+#    owner=root group=root mode=0644
+#  notify: restart nut-server
+
+#- name: Configurar TCP Wrappers Deny
+#  template: src=hosts.deny.j2
+#    dest=/etc/hosts.deny
+#    owner=root group=root mode=0644
+#  notify: restart nut-server
+#####
+
+
+# Configurar el monitor (upsmon)
+- name: Configurar monitor (upsmon)
+  template: src=upsmon.conf.j2
+    dest=/etc/nut/upsmon.conf
+    owner=root group=nut mode=0640
+  notify: restart nut-client
+
+- name: Crear directorio donde colocar script de notificación
+  file: path=/usr/local/ups/bin/ state=directory recurse=yes
+
+- name: Crear script de notificaciones
+  copy: src=notifyme.sh
+    dest=/usr/local/ups/bin/notifyme.sh
+    owner=root group=nut mode=0755
+
+
+# Configurar el planificador de eventos (upssched)
+- name: Configurar planificador (upssched)
+  template: src=upssched.conf.j2
+    dest=/etc/nut/upssched.conf
+    owner=root group=nut mode=0640
+  notify: restart nut-client
+
+- name: Crear directorio donde colocar script de gestión de eventos
+  file: path=/usr/local/ups/bin/ state=directory recurse=yes
+
+- name: Crear script de gestión de eventos
+  copy: src=upssched-cmd.sh
+    dest=/usr/local/ups/bin/upssched-cmd.sh
+    owner=root group=nut mode=0755
+
+
+### Configuración de programas CGI para panel de supervisión WEB
+### Se accede a través de http://<IP>/ups/upsstats.cgi
+- name: Configurar FQDN en Apache 2.2
+  include: apache22.yml
+  when: ansible_distribution == "Debian" and ansible_distribution_release == "wheezy"
+
+- name: Configurar FQDN en Apache 2.4
+  include: apache24.yml
+  when: ansible_distribution == "Ubuntu" and ansible_distribution_release == "trusty"
+
+- name: Asignar permisos a plantillas HTML
+  file: path=/etc/nut/{{ item }}
+    owner=root group=nut mode=0644
+  with_items:
+    - upsstats.html
+    - upsstats-single.html
+
+- name: Dirección de acceso a la utilidad upsstats.cgi
+  debug: msg="http://{{ item }}/ups/upsstats.cgi"
+  with_items: ansible_all_ipv4_addresses
+
+- name: Copiar configuración segura upsset.conf
+  copy: src=upsset.conf
+    dest=/etc/nut/upsset.conf
+    owner=root group=nut mode=0644
+  notify: restart nut-server
+  when: production
+
+- name: Activar la utilización de upsset.cgi # -- DESACTIVAR EN PRODUCCIÓN!!!
+  copy: content='# DESACTIVAR EN ENTORNOS DE PRODUCCION:\nI_HAVE_SECURED_MY_CGI_DIRECTORY\n'
+    dest=/etc/nut/upsset.conf
+    owner=root group=nut mode=0644
+  notify: restart nut-server
+  when: development
+
+- name: Dirección de acceso a la utilidad upsset.cgi
+  debug: msg="http://{{ item }}/ups/upsset.cgi"
+  with_items: ansible_all_ipv4_addresses
+  when: development
+#####

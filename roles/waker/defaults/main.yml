@@ -1,0 +1,12 @@
+---
+# defaults file for waker
+
+# IP a monitorizar
+waker_monitor_ip: '172.31.0.11'
+
+# Dirección MAC del equipo a despertar
+waker_wol_mac: 'aa:bb:cc:dd:ee:ff'
+
+# Cada cuántos minutos se realiza una comprobación
+waker_frequency: 1
+

@@ -1,0 +1,7 @@
+---
+- name: start nut-client
+  service: name=nut-client state=started
+
+- name: restart nut-client
+  service: name=nut-client state=restarted
+

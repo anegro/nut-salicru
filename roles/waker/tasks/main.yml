@@ -1,0 +1,17 @@
+---
+# Instalar paquetes necesarios
+- name: Instalar wakeonlan
+  apt: pkg=wakeonlan state=installed
+
+- name: Instalar script monitor Wake on LAN
+  template: src=wol-monitor.sh.j2
+    dest=/usr/local/bin/wol-monitor.sh
+    owner=root group=root mode=0755
+
+- name: Programar monitor WOL en /etc/cron.d
+  cron: name='Wake on LAN monitor'
+    minute='*/{{ waker_frequency }}'
+    job='/usr/local/bin/wol-monitor.sh &> /dev/null'
+    cron_file=wol-monitor
+    user=root
+

@@ -1,0 +1,28 @@
+---
+# Instalar NUT y configurar como esclavo en red
+- name: Instalar NUT
+  apt: pkg=nut-client state=installed
+  notify: start nut-client
+
+- name: Activar modo cliente de red
+  lineinfile: dest=/etc/nut/nut.conf
+    regexp='^MODE='
+    line='MODE=netclient'
+    owner=root group=nut mode=0640
+  notify: restart nut-client
+
+# Configurar el monitor (upsmon)
+- name: Configurar monitor (upsmon)
+  template: src=upsmon.conf.j2
+    dest=/etc/nut/upsmon.conf
+    owner=root group=nut mode=0640
+  notify: restart nut-client
+
+- name: Crear directorio donde colocar script de notificación
+  file: path=/usr/local/ups/bin/ state=directory recurse=yes
+
+- name: Crear script de notificaciones
+  copy: src=notifyme.sh
+    dest=/usr/local/ups/bin/notifyme.sh
+    owner=root group=nut mode=0755
+

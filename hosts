@@ -1,0 +1,10 @@
+[default]
+nut-master ansible_ssh_host=172.31.0.10 ansible_ssh_port=22 ansible_ssh_user=vagrant
+nut-slave ansible_ssh_host=172.31.0.11 ansible_ssh_port=22 ansible_ssh_user=vagrant
+
+[master]
+nut-master ansible_ssh_host=172.31.0.10 ansible_ssh_port=22 ansible_ssh_user=vagrant
+
+[slaves]
+nut-slave ansible_ssh_host=172.31.0.11 ansible_ssh_port=22 ansible_ssh_user=vagrant
+

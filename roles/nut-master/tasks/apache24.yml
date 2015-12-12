@@ -1,0 +1,28 @@
+# Específico para Apache 2.4
+- name: Configurar FQDN por defecto para Apache
+  copy: src=fqdn.conf
+    dest=/etc/apache2/conf-available/
+    owner=root group=root mode=0644
+  register: result
+
+- name: Activar FQDN por defecto para Apache
+  command: a2enconf fqdn
+  notify: restart apache
+  when: result|success
+
+- name: Configurar programas CGI
+  template: src=hosts.conf.j2
+    dest=/etc/nut/hosts.conf
+    owner=root group=nut mode=0644
+
+- name: Configurar cgi-bin en Apache para NUT
+  copy: src=upsstats.conf
+    dest=/etc/apache2/conf-available/upsstats.conf
+    owner=root group=root mode=0644
+  register: result
+
+- name: Activar cgi-bin en Apache para NUT
+  command: a2enconf upsstats
+  notify: restart apache
+  when: result|success
+

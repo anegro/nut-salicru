@@ -1,0 +1,8 @@
+---
+# Cambiar nombre de equipo
+- name: Asignar nombre de equipo
+  hostname: name={{ inventory_hostname }}
+
+- name: Asociar dirección de loopback
+  lineinfile: dest=/etc/hosts regexp='^127\.0\.1\.1' line='127.0.1.1 {{ inventory_hostname }}' owner=root group=root mode=0644
+

@@ -1,0 +1,26 @@
+---
+# Preparativos básicos para Debian
+
+# Reconfigurar locales
+- name: Preconfigurar español en locale.gen
+  lineinfile: dest=/etc/locale.gen
+    line='es_ES.UTF-8 UTF-8'
+  register: locale
+  tags:
+    - locales
+
+- name: Reconfigurar locales
+  command: locale-gen
+  when: locale|changed
+  tags:
+    - locales
+
+# Instalar y configurar paquetes útiles
+- name: Instalar paquetes útiles
+  apt: pkg={{ item }} state=installed
+  with_items:
+    - bash-completion
+    - less
+  tags:
+    - utilities
+

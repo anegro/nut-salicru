@@ -1,0 +1,18 @@
+# Específico para Apache 2.2
+- name: Configurar FQDN por defecto para Apache
+  copy: src=fqdn.conf
+    dest=/etc/apache2/conf.d/
+    owner=root group=root mode=0644
+  notify: restart apache
+
+- name: Configurar programas CGI
+  template: src=hosts.conf.j2
+    dest=/etc/nut/hosts.conf
+    owner=root group=nut mode=0644
+
+- name: Configurar cgi-bin en Apache para NUT
+  copy: src=upsstats.conf
+    dest=/etc/apache2/conf.d/upsstats.conf
+    owner=root group=root mode=0644
+  notify: restart apache
+

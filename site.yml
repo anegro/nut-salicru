@@ -1,0 +1,49 @@
+---
+- hosts: all
+  gather_facts: true
+  remote_user: vagrant
+  sudo: true
+  sudo_user: root
+
+  # Desactivar ejecución en paralelo para evitar problemas con Vagrant-Cachier
+  serial: 1
+
+  vars:
+    root_passwd: entrar
+  
+  pre_tasks:
+    - name: Comprobar si root tiene contraseña
+      shell: passwd -S root | cut -d " " -f 2
+      register: haspass
+      changed_when: not haspass.stdout == "P"
+
+    - name: Configurar "entrar" como contraseña de root
+      shell: 'echo root:{{ root_passwd }} | sudo chpasswd'
+      when: haspass|changed
+
+    - name: Permitir acceso por SSH mediante contraseña
+      lineinfile: dest=/etc/ssh/sshd_config
+        regexp='^PermitRootLogin'
+        line='PermitRootLogin yes'
+      notify: restart ssh
+  
+    - name: Actualizar la lista de paquetes
+      apt: update_cache=yes
+      tags: update_cache
+
+    - name: Instalar NTP
+      apt: pkg=ntp
+
+  roles:
+    - customize
+    - hostname
+
+  tasks:
+
+  handlers:
+    - include: handlers/main.yml
+
+# Acciones específicas para cada grupo de hosts
+- include: master.yml
+- include: slaves.yml
+

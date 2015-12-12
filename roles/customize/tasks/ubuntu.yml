@@ -1,0 +1,19 @@
+---
+# Preparativos básicos para Ubuntu Server
+
+# Instalar y configurar idioma español
+- name: Instalar idioma español
+  apt: pkg=language-pack-es state=installed
+  tags:
+    - locales
+
+# Configurar repositorios
+- name: Cambiar a repositorios globales
+  replace: dest=/etc/apt/sources.list
+    regexp='//.*\.archive\.ubuntu\.com'
+    replace='//archive.ubuntu.com'
+    backup=yes
+  tags:
+    - repositories
+
+

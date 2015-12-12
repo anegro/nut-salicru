@@ -1,0 +1,15 @@
+---
+# Tiempo de espera antes de cortar la corriente para que a los esclavos les de tiempo a apagarse correctamente
+upsmon_master_finaldelay: 40
+
+# Tiempo máximo antes de notificar que se ha perdido la comunicación con el SAI
+upssched_upsgone: 120
+
+# Tiempo de espera antes notificar al planificador de eventos que se está trabajando con batería
+# El planificador (upssched-cmd.sh) está configurado para iniciar un apagado forzoso al recibir el evento
+upssched_onbattwarn: 60
+
+# Nombre de hosts y de dominio para Postfix
+postfix_hostname: nut-master
+postfix_domainname: example.com
+

@@ -1,0 +1,8 @@
+---
+# Instalación de Apache2
+- name: Instalar Apache2 y módulo de MySQL
+  apt: pkg={{ item }} state=installed
+  with_items:
+    - apache2
+    - libapache2-mod-auth-mysql
+  notify: start apache

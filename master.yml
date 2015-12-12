@@ -1,0 +1,25 @@
+---
+- hosts: nut-master
+  gather_facts: true
+  remote_user: vagrant
+  sudo: true
+  sudo_user: root
+
+  # Desactivar ejecución en paralelo para evitar problemas con Vagrant-Cachier
+  serial: 1
+  
+  vars_files:
+    - vars/secrets.yml
+
+  pre_tasks:
+  
+  roles:
+    - apache    
+    - nut-master
+    - postfix
+    #- waker
+
+  tasks:
+
+  handlers:
+

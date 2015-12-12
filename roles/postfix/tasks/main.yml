@@ -1,0 +1,21 @@
+---
+- name: Instalar Postfix y utilidades
+  apt: pkg={{ item }} state=installed
+  with_items:
+    - postfix
+    - mailutils
+    - mutt
+  notify: start postfix
+
+- name: Configurar /etc/mailname
+  template: src=mailname.j2
+    dest=/etc/mailname
+    owner=root group=root mode=0644
+  notify: restart postfix
+
+- name: Configurar main.cf
+  template: src=main.cf.j2
+    dest=/etc/postfix/main.cf
+    owner=root group=root mode=0644
+  notify: restart postfix
+

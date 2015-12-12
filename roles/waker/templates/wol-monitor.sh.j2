@@ -1,0 +1,26 @@
+#! /bin/bash
+
+# Wake on LAN monitor
+
+# add ip / hostname separated by white space
+HOSTS=( '{{ waker_monitor_ip }}' )
+MACS=(  '{{ waker_wol_mac }}'  )
+ 
+# number of ping requests
+COUNT=4
+ 
+for i in ${!HOSTS[*]}; do
+	ip=${HOSTS[$i]}
+	mac=${MACS[$i]}
+
+	#echo "Checking IP $ip with MAC $mac..."
+	result=$(ping -c $COUNT $ip | grep 'received' | awk -F',' '{ print $2 }' | awk '{ print $1 }')
+
+	# 100% failed
+	if [ $result -eq 0 ]; then
+		logger -t wol-monitor.sh "Host $ip is down"
+		#echo "Host $ip is down (ping failed) at $(date +%Y-%m-%d_%H:%M:%S)"
+		#echo "Sending Wake on LAN packet to MAC $mac..."
+		wakeonlan $mac
+	fi
+done
