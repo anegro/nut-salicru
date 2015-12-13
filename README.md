@@ -32,9 +32,9 @@ Prueba a cambiar las variables del SAI. Por defecto (para entornos de desarrollo
 
 Para conseguir un funcionamiento correcto ha sido necesario realizar algunas modificaciones a los scripts de inicio que vienen con NUT.
 
-Echar un vistazo a las líneas marcadas con `ARREGLO` en los scripts del rol `nut-server`:
+Echar un vistazo a las líneas marcadas con `ARREGLO` en los scripts del rol `nut-master`:
 
-* `nut-client`
-* `nut-server`
+* `files/nut-client`
+* `files/nut-server`
 
 Estos scripts reemplazan a los que originalmente se instalan en `/etc/init.d/`. Es importante tenerlo en cuenta ya que pueden cambiar con una nueva versión de NUT.
